@@ -28,26 +28,20 @@ import subprocess
 import mlflow
 import time
 
-# =====================================================================
-# 1. Start Server Daemon
-# =====================================================================
+# Start Server Daemon
 # Spin up the server daemon in the background
 print("Starting background MLflow UI tracking server...")
 subprocess.Popen(["mlflow", "ui", "--host", "0.0.0.0", "--port", "5000"])
 time.sleep(3) # Give the OS daemon 3 seconds to bind to port 5000 safely
 
-# =====================================================================
-# 2. TRACKING AND CONFIGURATION SETTINGS
-# =====================================================================
+# TRACKING AND CONFIGURATION SETTINGS
 mlflow.set_tracking_uri("http://localhost:5000")
 
 # Set the name for the experiment
 mlflow.set_experiment("MLOps_GL_Tourism_Dev_Production01")
 print("Experiment Name: MLOps_GL_Tourism_Dev_Production01")
 
-# =====================================================================
-# 3. DATASET LOADING AND CLEANING
-# =====================================================================
+# DATASET LOADING AND CLEANING
 # Define constants for the dataset and output paths
 DATASET_PATH = "hf://datasets/HSMahendraGL/M10GLTourism/tourism.csv"
 df_tourism = pd.read_csv(DATASET_PATH)
@@ -90,11 +84,11 @@ Xtrain, Xtest, ytrain, ytest = train_test_split(
 
 # One-hot encode 'Type' and scale numeric features
 col_names = X.columns.tolist()
-exclude_set = set(columns_to_encode)
+exclude_set = set(columns_to_encode+columns_to_categorize)
 numeric_features = [item for item in col_names if item not in exclude_set]
 
 #print(df_tourism.head(15))
-print(f"Catergorical features: { columns_to_encode } ")
+print(f"Catergorical features: { columns_to_encode+columns_to_categorize } ")
 print(f"Numerical features: { numeric_features } ")
 
 
@@ -105,7 +99,7 @@ class_weight
 # Define the preprocessing steps
 preprocessor = make_column_transformer(
     (StandardScaler(), numeric_features),
-    (OneHotEncoder(handle_unknown='ignore'), columns_to_encode)
+    (OneHotEncoder(handle_unknown='ignore'), columns_to_encode+columns_to_categorize)
 )
 
 # Define base XGBoost model
